@@ -81,6 +81,18 @@ class VoicePage(QWidget):
             }
         """)
         self.voice_list.setFixedHeight(100)
+        
+        from PySide6.QtCore import QSettings
+        self.settings = QSettings("Thatwaat", "AgentAI")
+        last_voice = self.settings.value("last_voice_profile", "Default AI")
+        items = self.voice_list.findItems(last_voice, Qt.MatchExactly)
+        if items:
+            self.voice_list.setCurrentItem(items[0])
+            
+        self.voice_list.currentItemChanged.connect(
+            lambda current, previous: self.settings.setValue("last_voice_profile", current.text()) if current else None
+        )
+        
         clone_layout.addWidget(self.voice_list)
         
         clone_btn_layout1 = QHBoxLayout()
@@ -141,6 +153,20 @@ class VoicePage(QWidget):
             export_btn_layout.addWidget(btn)
         
         export_layout.addLayout(export_btn_layout)
+        
+        from PySide6.QtWidgets import QProgressBar
+        self.synth_progress = QProgressBar()
+        self.synth_progress.setRange(0, 1) # Set to (0, 0) for indeterminate, (0,1) for idle
+        self.synth_progress.setValue(0)
+        self.synth_progress.setStyleSheet("""
+            QProgressBar {
+                border: 1px solid rgba(255,255,255,0.2); border-radius: 5px;
+                text-align: center; color: white; background-color: #111827;
+            }
+            QProgressBar::chunk { background-color: #3B82F6; }
+        """)
+        export_layout.addWidget(self.synth_progress)
+        
         layout.addWidget(export_card)
 
         # --- Card 3: Audio Settings ---
@@ -323,6 +349,8 @@ class VoicePage(QWidget):
         speed = self.speed_slider.value() / 100.0
         volume = self.volume_slider.value() / 100.0
         
+        self.synth_progress.setRange(0, 0) # Start indeterminate progress
+        
         self.synth_thread = QThread()
         self.synthesizer = VoiceSynthesizer()
         self.synthesizer.moveToThread(self.synth_thread)
@@ -339,7 +367,14 @@ class VoicePage(QWidget):
         
         self.synth_thread.start()
         self.active_threads.append(self.synth_thread)
-        self.synth_thread.finished.connect(lambda: self.active_threads.remove(self.synth_thread) if self.synth_thread in self.active_threads else None)
+        self.synth_thread.finished.connect(self.on_synth_finished)
+        
+    def on_synth_finished(self):
+        if hasattr(self, 'synth_thread') and self.synth_thread in self.active_threads:
+            self.active_threads.remove(self.synth_thread)
+        self.synth_progress.setRange(0, 1)
+        self.synth_progress.setValue(1)
+
     def pause_audio(self):
         QMessageBox.information(self, "Info", "Audio paused.")
         
@@ -375,5 +410,10 @@ class VoicePage(QWidget):
                 QMessageBox.critical(self, "Error", f"Failed to save file:\n{str(e)}")
 
     def share_audio(self):
-        QMessageBox.information(self, "Info", "Share feature coming soon.")
+        import os
+        if os.path.exists("temp_output.wav"):
+            file_path = os.path.abspath("temp_output.wav")
+            os.system(f'explorer /select,"{file_path}"')
+        else:
+            QMessageBox.warning(self, "No Output", "Generate a voice clone first before sharing.")
 
