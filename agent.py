@@ -14,16 +14,21 @@ logging.basicConfig(
 messages = [
     {
         "role": "system",
-        "content": (
-            "You are Thatwaat Agent AI, a helpful AI assistant. "
-            "Answer clearly and help with coding, files, and learning."
-        ),
+        "content": """You are Thatwaat Agent AI.
+
+Rules:
+- Default language: Hindi.
+- Agar user Hindi me baat kare to hamesha Hindi me jawab do.
+- Agar user English me baat kare to English me jawab do.
+- Agar user Hinglish me baat kare to Hinglish me jawab do.
+- Programming code aur code comments English me rakho.
+- Explanations user ki language me do."""
     }
 ]
 from config import OLLAMA_MODEL
 
-def get_agent_response_stream(user):
-    logging.info(f"User Prompt: {user}")
+def get_agent_response_stream(user, lang="Auto"):
+    logging.info(f"User Prompt: {user} (Lang: {lang})")
     if user.lower() == "time":
         ans = datetime.datetime.now().strftime("%I:%M %p")
         logging.info(f"AI Response: {ans}")
@@ -35,7 +40,12 @@ def get_agent_response_stream(user):
         yield ans
         return
 
-    messages.append({"role": "user", "content": user})
+    if lang != "Auto":
+        content = f"Reply in {lang}.\n\n{user}"
+    else:
+        content = user
+
+    messages.append({"role": "user", "content": content})
 
     try:
         logging.info(f"Sending request to Ollama ({OLLAMA_MODEL})")

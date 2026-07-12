@@ -14,15 +14,16 @@ class AgentWorker(QObject):
     finished = Signal(str)
     error = Signal(str)
 
-    def __init__(self, prompt):
+    def __init__(self, prompt, lang="Auto"):
         super().__init__()
         self.prompt = prompt
+        self.lang = lang
         self.is_running = True
 
     def process(self):
         try:
             full_response = ""
-            for token in get_agent_response_stream(self.prompt):
+            for token in get_agent_response_stream(self.prompt, self.lang):
                 if not self.is_running:
                     break
                 full_response += token
@@ -139,6 +140,24 @@ class ChatPage(QWidget):
         self.lbl_status.setStyleSheet("color: #9CA3AF; font-size: 12px; font-weight: bold;")
         toolbar_layout.addWidget(self.lbl_status)
         
+        from PySide6.QtWidgets import QComboBox
+        from PySide6.QtCore import QSettings
+        
+        self.lang_selector = QComboBox()
+        self.lang_selector.addItems(["Auto", "Hindi", "English", "Hinglish"])
+        self.lang_selector.setStyleSheet("""
+            QComboBox { background-color: transparent; color: #9CA3AF; border: none; font-weight: bold; }
+            QComboBox::drop-down { border: none; }
+        """)
+        self.lang_selector.setCursor(Qt.CursorShape.PointingHandCursor)
+        
+        self.settings = QSettings("Thatwaat", "AgentAI")
+        last_lang = self.settings.value("chat_language", "Auto")
+        self.lang_selector.setCurrentText(last_lang)
+        self.lang_selector.currentTextChanged.connect(lambda t: self.settings.setValue("chat_language", t))
+        
+        toolbar_layout.addWidget(self.lang_selector)
+        
         input_layout.addLayout(toolbar_layout)
         
         self.conn_timer = QTimer(self)
@@ -150,13 +169,13 @@ class ChatPage(QWidget):
         text_row_layout = QHBoxLayout()
         self.input_field = DropTextEdit()
         self.input_field.setPlaceholderText("Type your message...")
-        self.input_field.setFixedHeight(50)
+        self.input_field.setFixedHeight(40) # Reduced from 50
         self.input_field.setStyleSheet("""
             QTextEdit {
                 background-color: transparent;
                 border: none;
                 color: white;
-                font-size: 14px;
+                font-size: 13px; /* Reduced from 14 */
             }
         """)
         
@@ -303,8 +322,9 @@ class ChatPage(QWidget):
         self.send_btn.clicked.disconnect()
         self.send_btn.clicked.connect(self.stop_generation)
         
+        lang = self.lang_selector.currentText()
         self.thread = QThread()
-        self.worker = AgentWorker(text)
+        self.worker = AgentWorker(text, lang)
         self.worker.moveToThread(self.thread)
         
         self.thread.started.connect(self.worker.process)

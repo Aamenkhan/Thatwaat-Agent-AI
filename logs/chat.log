@@ -1,0 +1,17 @@
+2026-07-12 12:14:03,283 - INFO - HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-tiny.en/revision/main "HTTP/1.1 200 OK"
+2026-07-12 12:14:03,746 - INFO - HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-tiny.en/resolve/0d3d19a32d3338f10357c0889762bd8d64bbdeba/config.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-12 12:14:03,838 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-tiny.en/0d3d19a32d3338f10357c0889762bd8d64bbdeba/config.json "HTTP/1.1 200 OK"
+2026-07-12 12:14:03,998 - INFO - HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-tiny.en/0d3d19a32d3338f10357c0889762bd8d64bbdeba/config.json "HTTP/1.1 200 OK"
+2026-07-12 12:14:03,998 - INFO - HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-tiny.en/resolve/0d3d19a32d3338f10357c0889762bd8d64bbdeba/model.bin "HTTP/1.1 302 Found"
+2026-07-12 12:14:04,006 - INFO - HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-tiny.en/resolve/0d3d19a32d3338f10357c0889762bd8d64bbdeba/vocabulary.txt "HTTP/1.1 307 Temporary Redirect"
+2026-07-12 12:14:04,007 - WARNING - Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+2026-07-12 12:14:04,098 - INFO - HTTP Request: HEAD https://huggingface.co/Systran/faster-whisper-tiny.en/resolve/0d3d19a32d3338f10357c0889762bd8d64bbdeba/tokenizer.json "HTTP/1.1 307 Temporary Redirect"
+2026-07-12 12:14:04,197 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-tiny.en/0d3d19a32d3338f10357c0889762bd8d64bbdeba/vocabulary.txt "HTTP/1.1 200 OK"
+2026-07-12 12:14:04,206 - INFO - HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-tiny.en/0d3d19a32d3338f10357c0889762bd8d64bbdeba/tokenizer.json "HTTP/1.1 200 OK"
+2026-07-12 12:14:04,304 - INFO - HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-tiny.en/0d3d19a32d3338f10357c0889762bd8d64bbdeba/tokenizer.json "HTTP/1.1 200 OK"
+2026-07-12 12:14:04,332 - INFO - HTTP Request: GET https://huggingface.co/api/resolve-cache/models/Systran/faster-whisper-tiny.en/0d3d19a32d3338f10357c0889762bd8d64bbdeba/vocabulary.txt "HTTP/1.1 200 OK"
+2026-07-12 12:14:04,941 - INFO - HTTP Request: GET https://huggingface.co/api/models/Systran/faster-whisper-tiny.en/xet-read-token/0d3d19a32d3338f10357c0889762bd8d64bbdeba "HTTP/1.1 200 OK"
+2026-07-12 12:15:11,550 - INFO - User Prompt: hindi mai likho
+2026-07-12 12:15:11,550 - INFO - Sending request to Ollama (qwen2.5-coder:3b)
+2026-07-12 12:15:16,192 - INFO - HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+2026-07-12 12:15:18,455 - INFO - AI Response: Sure! How can I assist you today?
