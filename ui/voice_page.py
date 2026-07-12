@@ -74,14 +74,15 @@ class VoicePage(QWidget):
         clone_layout.addWidget(self.voice_selector)
         
         clone_btn_layout = QHBoxLayout()
-        self.btn_import_voice = QPushButton("📁 Import Voice Sample")
+        self.btn_import_voice = QPushButton("📁 Import Sample")
         self.btn_test_voice = QPushButton("🔊 Test Voice")
+        self.btn_save_voice = QPushButton("💾 Save Output")
         
-        for btn in [self.btn_import_voice, self.btn_test_voice]:
+        for btn in [self.btn_import_voice, self.btn_test_voice, self.btn_save_voice]:
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet("""
                 QPushButton {
-                    background-color: #111827; color: #9CA3AF; padding: 10px 20px;
+                    background-color: #111827; color: #9CA3AF; padding: 10px 15px;
                     border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
                 }
                 QPushButton:hover { color: white; border: 1px solid #3B82F6; }
@@ -129,6 +130,7 @@ class VoicePage(QWidget):
         self.btn_stop.clicked.connect(self.stop_listening)
         self.btn_import_voice.clicked.connect(self.import_voice_sample)
         self.btn_test_voice.clicked.connect(self.test_voice_clone)
+        self.btn_save_voice.clicked.connect(self.save_voice_output)
         
         self.active_threads = []
         self.speaker_wav_path = None
@@ -206,4 +208,19 @@ class VoicePage(QWidget):
 
     def on_voice_error(self, err):
         QMessageBox.critical(self, "Voice Error", err)
+
+    def save_voice_output(self):
+        import os
+        import shutil
+        if not os.path.exists("temp_output.wav"):
+            QMessageBox.warning(self, "No Output", "Generate a voice clone first before saving.")
+            return
+            
+        save_path, _ = QFileDialog.getSaveFileName(self, "Save Audio", "cloned_voice.wav", "Audio Files (*.wav)")
+        if save_path:
+            try:
+                shutil.copy("temp_output.wav", save_path)
+                QMessageBox.information(self, "Success", f"Audio saved to:\n{save_path}")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to save file:\n{str(e)}")
 
