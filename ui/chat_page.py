@@ -193,20 +193,33 @@ class ChatPage(QWidget):
         self.send_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.send_btn.setStyleSheet("""
             QPushButton {
-                background-color: transparent;
-                color: #3B82F6;
+                background-color: #3B82F6;
+                color: white;
                 border: none;
+                border-radius: 15px;
                 font-weight: bold;
                 font-size: 14px;
-                padding: 10px;
+                padding: 10px 20px;
             }
-            QPushButton:hover { color: #60A5FA; }
+            QPushButton:hover { background-color: #2563EB; }
+            QPushButton:pressed { background-color: #1D4ED8; }
         """)
         self.send_btn.clicked.connect(self.send_message)
         
         self.btn_regenerate = QPushButton("🔄 Regenerate")
         self.btn_regenerate.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.btn_regenerate.setStyleSheet(self.send_btn.styleSheet().replace("#3B82F6", "#10B981").replace("#60A5FA", "#34D399"))
+        self.btn_regenerate.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: #10B981;
+                border: 1px solid #10B981;
+                border-radius: 15px;
+                font-weight: bold;
+                font-size: 12px;
+                padding: 5px 15px;
+            }
+            QPushButton:hover { background-color: rgba(16, 185, 129, 0.1); }
+        """)
         self.btn_regenerate.clicked.connect(self.regenerate_message)
         self.btn_regenerate.hide()
         
@@ -220,21 +233,18 @@ class ChatPage(QWidget):
 
     def show_welcome_message(self):
         welcome_html = """
-        <div style='background-color: #1E293B; padding: 20px; border-radius: 12px; margin-bottom: 20px;'>
-            <h2 style='color: white; margin-top: 0;'>👋 Welcome to Thatwaat AI</h2>
-            <p style='color: #9CA3AF;'>What would you like to do today?</p>
-            <table cellpadding="5" cellspacing="0" style="width: 100%;">
+        <div style='background-color: #1E293B; padding: 30px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px; text-align: center;'>
+            <h2 style='color: #F8FAFC; margin-top: 0; font-size: 22px;'>👋 Welcome to Thatwaat AI</h2>
+            <p style='color: #94A3B8; font-size: 14px;'>How can I help you today?</p>
+            <br>
+            <table cellpadding="10" cellspacing="10" style="width: 100%; text-align: center;">
                 <tr>
-                    <td><a href="action:write_code" style='color: #3B82F6; text-decoration: none;'><b>[💻 Write Code]</b></a></td>
-                    <td><a href="action:send_email" style='color: #8B5CF6; text-decoration: none;'><b>[📧 Send Email]</b></a></td>
+                    <td style="background-color: #0F172A; border-radius: 10px;"><a href="action:write_code" style='color: #60A5FA; text-decoration: none; font-size: 14px;'><b>💻 Write Code</b></a></td>
+                    <td style="background-color: #0F172A; border-radius: 10px;"><a href="action:send_email" style='color: #A78BFA; text-decoration: none; font-size: 14px;'><b>📧 Send Email</b></a></td>
                 </tr>
                 <tr>
-                    <td><a href="action:analyze_image" style='color: #10B981; text-decoration: none;'><b>[👁️ Analyze Image]</b></a></td>
-                    <td><a href="action:summarize_file" style='color: #06B6D4; text-decoration: none;'><b>[📄 Summarize File]</b></a></td>
-                </tr>
-                <tr>
-                    <td><a href="action:search_web" style='color: #F59E0B; text-decoration: none;'><b>[🌐 Search Web]</b></a></td>
-                    <td></td>
+                    <td style="background-color: #0F172A; border-radius: 10px;"><a href="action:analyze_image" style='color: #34D399; text-decoration: none; font-size: 14px;'><b>👁️ Analyze Image</b></a></td>
+                    <td style="background-color: #0F172A; border-radius: 10px;"><a href="action:summarize_file" style='color: #22D3EE; text-decoration: none; font-size: 14px;'><b>📄 Summarize File</b></a></td>
                 </tr>
             </table>
         </div>
@@ -301,23 +311,24 @@ class ChatPage(QWidget):
         self.btn_regenerate.hide()
         
         time_str = datetime.now().strftime('%I:%M %p')
-        user_html = f"<div style='text-align:right;'><b style='color:#3B82F6;'>You:</b> <span style='color:gray;font-size:10px;'>{time_str}</span><br>{text}</div><br>"
+        user_html = f"<div style='text-align:right;'><div style='display:inline-block; text-align:left; background-color: #3B82F6; color: white; padding: 12px 18px; border-radius: 15px; border-bottom-right-radius: 2px; max-width: 80%;'><b style='color:#DBEAFE;'>You:</b> <span style='color:#93C5FD; font-size:10px;'>{time_str}</span><br>{text}</div></div><br>"
         self.chat_html_history += user_html
-        self.chat_history.setHtml(self.chat_html_history + "<i style='color:gray;'>Thatwaat AI is thinking...</i><br>")
+        self.chat_history.setHtml(self.chat_html_history + "<i style='color:#94A3B8; font-size: 13px;'>✨ Thatwaat AI is thinking...</i><br>")
         self.current_reply = ""
         
         # Change Send button to Stop button
         self.send_btn.setText("⏹️ Stop")
         self.send_btn.setStyleSheet("""
             QPushButton {
-                background-color: transparent;
-                color: #EF4444;
+                background-color: #EF4444;
+                color: white;
                 border: none;
+                border-radius: 15px;
                 font-weight: bold;
                 font-size: 14px;
-                padding: 10px;
+                padding: 10px 20px;
             }
-            QPushButton:hover { color: #DC2626; }
+            QPushButton:hover { background-color: #DC2626; }
         """)
         self.send_btn.clicked.disconnect()
         self.send_btn.clicked.connect(self.stop_generation)
@@ -354,14 +365,16 @@ class ChatPage(QWidget):
         self.send_btn.setText("➤ Send")
         self.send_btn.setStyleSheet("""
             QPushButton {
-                background-color: transparent;
-                color: #3B82F6;
+                background-color: #3B82F6;
+                color: white;
                 border: none;
+                border-radius: 15px;
                 font-weight: bold;
                 font-size: 14px;
-                padding: 10px;
+                padding: 10px 20px;
             }
-            QPushButton:hover { color: #60A5FA; }
+            QPushButton:hover { background-color: #2563EB; }
+            QPushButton:pressed { background-color: #1D4ED8; }
         """)
         self.send_btn.clicked.disconnect()
         self.send_btn.clicked.connect(self.send_message)
@@ -372,7 +385,7 @@ class ChatPage(QWidget):
         html_text = self.process_markdown(self.current_reply)
         cursor = " <span style='background-color: white; width: 8px; display: inline-block;'>&nbsp;</span>"
         time_str = datetime.now().strftime('%I:%M %p')
-        final_html = self.chat_html_history + f"<div style='background-color: #111827; padding: 15px; border-radius: 10px;'><b style='color:#10B981;'>Thatwaat AI:</b> <span style='color:gray;font-size:10px;'>{time_str}</span><br>{html_text}{cursor}</div><br><br>"
+        final_html = self.chat_html_history + f"<div style='background-color: #1E293B; border: 1px solid rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 15px; border-bottom-left-radius: 2px; margin-right: 15%;'><b style='color:#10B981;'>✨ Thatwaat AI</b> <span style='color:#64748B; font-size:10px;'>{time_str}</span><br><br>{html_text}{cursor}</div><br>"
         self.chat_history.setHtml(final_html)
         self.chat_history.verticalScrollBar().setValue(self.chat_history.verticalScrollBar().maximum())
 
@@ -380,7 +393,7 @@ class ChatPage(QWidget):
         self.reset_send_button()
         html_text = self.process_markdown(text)
         time_str = datetime.now().strftime('%I:%M %p')
-        agent_html = f"<div style='background-color: #111827; padding: 15px; border-radius: 10px;'><b style='color:#10B981;'>Thatwaat AI:</b> <span style='color:gray;font-size:10px;'>{time_str}</span><br>{html_text}</div><br><br>"
+        agent_html = f"<div style='background-color: #1E293B; border: 1px solid rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 15px; border-bottom-left-radius: 2px; margin-right: 15%;'><b style='color:#10B981;'>✨ Thatwaat AI</b> <span style='color:#64748B; font-size:10px;'>{time_str}</span><br><br>{html_text}</div><br>"
         self.chat_html_history += agent_html
         self.chat_history.setHtml(self.chat_html_history)
         self.chat_history.verticalScrollBar().setValue(self.chat_history.verticalScrollBar().maximum())
