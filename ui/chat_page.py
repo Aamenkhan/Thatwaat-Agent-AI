@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QTextEdit, QHBoxLayout, 
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QTextBrowser, QTextEdit, QHBoxLayout, 
                                QPushButton, QLabel, QScrollArea, QFrame, QGridLayout)
 from PySide6.QtCore import Qt, QThread, Signal
 from agent import get_agent_response
@@ -28,10 +28,12 @@ class ChatPage(QWidget):
         layout.setSpacing(20)
         
         # Chat History
-        self.chat_history = QTextEdit()
+        self.chat_history = QTextBrowser()
         self.chat_history.setReadOnly(True)
+        self.chat_history.setOpenLinks(False) # We will handle clicks manually
+        self.chat_history.anchorClicked.connect(self.handle_link_click)
         self.chat_history.setStyleSheet("""
-            QTextEdit {
+            QTextBrowser {
                 background-color: transparent;
                 border: none;
                 color: white;
@@ -119,21 +121,34 @@ class ChatPage(QWidget):
             <p style='color: #9CA3AF;'>What would you like to do today?</p>
             <table cellpadding="5" cellspacing="0" style="width: 100%;">
                 <tr>
-                    <td><b style='color: #3B82F6;'>[💻 Write Code]</b></td>
-                    <td><b style='color: #8B5CF6;'>[📧 Send Email]</b></td>
+                    <td><a href="action:write_code" style='color: #3B82F6; text-decoration: none;'><b>[💻 Write Code]</b></a></td>
+                    <td><a href="action:send_email" style='color: #8B5CF6; text-decoration: none;'><b>[📧 Send Email]</b></a></td>
                 </tr>
                 <tr>
-                    <td><b style='color: #10B981;'>[👁️ Analyze Image]</b></td>
-                    <td><b style='color: #06B6D4;'>[📄 Summarize File]</b></td>
+                    <td><a href="action:analyze_image" style='color: #10B981; text-decoration: none;'><b>[👁️ Analyze Image]</b></a></td>
+                    <td><a href="action:summarize_file" style='color: #06B6D4; text-decoration: none;'><b>[📄 Summarize File]</b></a></td>
                 </tr>
                 <tr>
-                    <td><b style='color: #F59E0B;'>[🌐 Search Web]</b></td>
+                    <td><a href="action:search_web" style='color: #F59E0B; text-decoration: none;'><b>[🌐 Search Web]</b></a></td>
                     <td></td>
                 </tr>
             </table>
         </div>
         """
         self.chat_history.append(welcome_html)
+
+    def handle_link_click(self, url):
+        action = url.toString()
+        prompts = {
+            "action:write_code": "Write a python script to ",
+            "action:send_email": "Draft an email to ",
+            "action:analyze_image": "Analyze the attached image and ",
+            "action:summarize_file": "Summarize this file: ",
+            "action:search_web": "Search the web for "
+        }
+        if action in prompts:
+            self.input_field.setText(prompts[action])
+            self.input_field.setFocus()
 
     def send_message(self):
         text = self.input_field.toPlainText().strip()
