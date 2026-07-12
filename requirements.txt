@@ -1,0 +1,6 @@
+ollama
+SpeechRecognition
+pyttsx3
+pyaudio
+opencv-python
+pywhatkit
