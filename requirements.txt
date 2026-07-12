@@ -4,6 +4,9 @@ pyttsx3
 pyaudio
 opencv-python
 pywhatkit
-flask
-flask-cors
-pywebview
+faster-whisper
+ultralytics
+easyocr
+selenium
+markdown
+PySide6
