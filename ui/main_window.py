@@ -1,6 +1,8 @@
-from PySide6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QStackedWidget
+from PySide6.QtWidgets import QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QStackedWidget
 from PySide6.QtCore import Qt
 from ui.sidebar import Sidebar
+from ui.top_bar import TopBar
+from ui.right_panel import RightPanel
 from ui.chat_page import ChatPage
 from ui.vision_page import VisionPage
 from ui.voice_page import VoicePage
@@ -8,27 +10,45 @@ from ui.automation_page import AutomationPage
 from ui.settings_page import SettingsPage
 
 class MainWindow(QMainWindow):
-    """The main application shell incorporating the sidebar and page router."""
+    """The main application shell incorporating the new complex layout."""
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Thatwaat Agent AI")
-        self.resize(1200, 800)
+        self.resize(1400, 900)
         self.setStyleSheet("background-color: #0B1220;")
 
         # Central Widget
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        main_layout = QHBoxLayout(central_widget)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+        
+        # Main Vertical Layout (TopBar + Content)
+        main_v_layout = QVBoxLayout(central_widget)
+        main_v_layout.setContentsMargins(0, 0, 0, 0)
+        main_v_layout.setSpacing(0)
+        
+        # Top Bar
+        self.top_bar = TopBar()
+        main_v_layout.addWidget(self.top_bar)
+
+        # Content Horizontal Layout (Sidebar + Router + RightPanel)
+        content_h_layout = QHBoxLayout()
+        content_h_layout.setContentsMargins(0, 0, 0, 0)
+        content_h_layout.setSpacing(0)
 
         # Sidebar
         self.sidebar = Sidebar()
-        main_layout.addWidget(self.sidebar)
+        content_h_layout.addWidget(self.sidebar)
 
         # Page Router (Stacked Widget)
         self.stacked_widget = QStackedWidget()
-        main_layout.addWidget(self.stacked_widget)
+        self.stacked_widget.setStyleSheet("background-color: #0B1220;")
+        content_h_layout.addWidget(self.stacked_widget)
+        
+        # Right Panel
+        self.right_panel = RightPanel()
+        content_h_layout.addWidget(self.right_panel)
+
+        main_v_layout.addLayout(content_h_layout)
 
         # Initialize Pages
         self.chat_page = ChatPage()
