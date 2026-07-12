@@ -2,11 +2,7 @@ import ollama
 import datetime
 import os
 
-print("=" * 50)
-print("🤖 Thatwaat Agent AI")
-print("Type 'exit' to quit")
-print("=" * 50)
-
+# Agent CLI prints moved to run_cli
 messages = [
     {
         "role": "system",
@@ -36,6 +32,11 @@ def get_agent_response(user):
     return answer
 
 def run_cli():
+    print("=" * 50)
+    print("🤖 Thatwaat Agent AI")
+    print("Type 'exit' to quit")
+    print("=" * 50)
+    
     while True:
         user = input("\nYou: ")
 

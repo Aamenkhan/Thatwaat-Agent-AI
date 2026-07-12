@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QLineEdit, QHBoxLayout, QPushButton, QLabel, QScrollArea
 from PySide6.QtCore import Qt, QThread, Signal
 from agent import get_agent_response
+import markdown
 
 class AgentWorker(QThread):
     finished = Signal(str)
@@ -95,7 +96,8 @@ class ChatPage(QWidget):
         self.worker.start()
 
     def on_response(self, text):
-        self.chat_history.append(f"<b style='color:#10B981;'>Thatwaat AI:</b> {text}<br><br>")
+        html_text = markdown.markdown(text, extensions=['fenced_code', 'tables'])
+        self.chat_history.append(f"<b style='color:#10B981;'>Thatwaat AI:</b> {html_text}<br><br>")
         # Scroll to bottom
         self.chat_history.verticalScrollBar().setValue(self.chat_history.verticalScrollBar().maximum())
 
