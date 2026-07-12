@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thatwaat Agent AI</title>
+    <!-- Use Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon"><i class="fa-solid fa-robot"></i></div>
+                <h2>Thatwaat AI</h2>
+            </div>
+            
+            <button class="new-chat-btn">
+                <i class="fa-solid fa-plus"></i> New Chat
+            </button>
+
+            <nav class="nav-menu">
+                <div class="nav-section">
+                    <p class="section-title">MAIN</p>
+                    <a href="#" class="nav-item active"><i class="fa-regular fa-message"></i> AI Chat</a>
+                    <a href="#" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i> Chat History</a>
+                    <a href="#" class="nav-item"><i class="fa-solid fa-brain"></i> Memory</a>
+                </div>
+
+                <div class="nav-section">
+                    <p class="section-title">FEATURES</p>
+                    <a href="#" class="nav-item"><i class="fa-regular fa-eye"></i> Vision</a>
+                    <a href="#" class="nav-item"><i class="fa-solid fa-microphone-lines"></i> Voice</a>
+                    <a href="#" class="nav-item"><i class="fa-regular fa-envelope"></i> Email</a>
+                    <a href="#" class="nav-item"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+                    <a href="#" class="nav-item"><i class="fa-solid fa-bolt"></i> Automation</a>
+                    <a href="#" class="nav-item"><i class="fa-regular fa-folder-open"></i> Files</a>
+                </div>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+                <div class="user-profile">
+                    <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                    <div class="user-info">
+                        <span class="name">Aamen</span>
+                        <span class="status text-success">Online</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-workspace">
+            <!-- Top Bar -->
+            <header class="top-bar glass-panel">
+                <div class="top-left">
+                    <div class="ai-status">
+                        <span class="status-dot online"></span>
+                        <span>Agent Online</span>
+                    </div>
+                    <div class="model-badge">
+                        <i class="fa-solid fa-cube"></i> qwen2.5-coder:3b
+                    </div>
+                </div>
+                
+                <div class="top-right">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Search memory...">
+                    </div>
+                    <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
+                    <div class="perf-indicator">
+                        <i class="fa-solid fa-microchip"></i> 42%
+                    </div>
+                </div>
+            </header>
+
+            <!-- Chat Area -->
+            <div class="chat-container">
+                <div class="chat-history" id="chat-history">
+                    <!-- Intro Message -->
+                    <div class="message ai-message">
+                        <div class="message-avatar"><i class="fa-solid fa-robot"></i></div>
+                        <div class="message-content glass-panel">
+                            <p>Hello! I am Thatwaat Agent AI. How can I assist you today?</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="input-area glass-panel">
+                    <div class="input-actions">
+                        <button class="icon-btn" title="Upload File"><i class="fa-solid fa-paperclip"></i></button>
+                        <button class="icon-btn" title="Camera"><i class="fa-solid fa-camera"></i></button>
+                        <button class="icon-btn" title="Voice Clone"><i class="fa-solid fa-wave-square"></i></button>
+                    </div>
+                    <textarea id="prompt-input" placeholder="Ask anything..."></textarea>
+                    <div class="input-actions right">
+                        <button class="icon-btn" id="mic-btn" title="Voice Input"><i class="fa-solid fa-microphone"></i></button>
+                        <button class="send-btn" id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Assistant Panel -->
+        <aside class="right-panel glass-panel">
+            <h3 class="panel-title">Assistant Tools</h3>
+            
+            <div class="panel-card">
+                <h4><i class="fa-solid fa-video"></i> Live Vision</h4>
+                <div class="camera-preview">
+                    <span>Camera Offline</span>
+                </div>
+            </div>
+
+            <div class="panel-card">
+                <h4><i class="fa-solid fa-server"></i> Running Tasks</h4>
+                <ul class="task-list">
+                    <li><i class="fa-solid fa-circle-notch fa-spin text-accent"></i> Background indexing</li>
+                </ul>
+            </div>
+
+            <div class="panel-card">
+                <h4><i class="fa-regular fa-lightbulb"></i> Suggestions</h4>
+                <div class="suggestion-chips">
+                    <span class="chip">Check Emails</span>
+                    <span class="chip">Read latest news</span>
+                    <span class="chip">Organize Desktop</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

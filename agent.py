@@ -16,29 +16,34 @@ messages = [
         ),
     }
 ]
+from config import OLLAMA_MODEL
 
-while True:
-    user = input("\nYou: ")
-
-    if user.lower() == "exit":
-        break
-
+def get_agent_response(user):
     if user.lower() == "time":
-        print("AI:", datetime.datetime.now().strftime("%I:%M %p"))
-        continue
-
+        return datetime.datetime.now().strftime("%I:%M %p")
     if user.lower() == "date":
-        print("AI:", datetime.date.today())
-        continue
+        return str(datetime.date.today())
 
     messages.append({"role": "user", "content": user})
 
     response = ollama.chat(
-        model="qwen2.5-coder:3b",
+        model=OLLAMA_MODEL,
         messages=messages,
     )
 
     answer = response["message"]["content"]
-    print("\nAI:", answer)
-
     messages.append({"role": "assistant", "content": answer})
+    return answer
+
+def run_cli():
+    while True:
+        user = input("\nYou: ")
+
+        if user.lower() == "exit":
+            break
+        
+        answer = get_agent_response(user)
+        print("\nAI:", answer)
+
+if __name__ == "__main__":
+    run_cli()

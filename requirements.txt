@@ -4,3 +4,6 @@ pyttsx3
 pyaudio
 opencv-python
 pywhatkit
+flask
+flask-cors
+pywebview
