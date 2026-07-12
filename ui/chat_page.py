@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QTextBrowser, QTextEdit, QHBoxLayout, 
-                               QPushButton, QLabel, QScrollArea, QFrame, QGridLayout)
+                               QPushButton, QLabel, QScrollArea, QFrame, QGridLayout, QFileDialog, QMessageBox)
 from PySide6.QtCore import Qt, QThread, Signal
 from agent import get_agent_response
 import markdown
@@ -61,9 +61,13 @@ class ChatPage(QWidget):
         
         # Toolbar (Icons)
         toolbar_layout = QHBoxLayout()
-        icons = ["📎", "🎤", "📸", "😋"]
-        for icon in icons:
-            btn = QPushButton(icon)
+        
+        self.btn_attach = QPushButton("📎")
+        self.btn_voice = QPushButton("🎤")
+        self.btn_camera = QPushButton("📸")
+        self.btn_emoji = QPushButton("😋")
+        
+        for btn in [self.btn_attach, self.btn_voice, self.btn_camera, self.btn_emoji]:
             btn.setCursor(Qt.CursorShape.PointingHandCursor)
             btn.setStyleSheet("""
                 QPushButton {
@@ -73,9 +77,15 @@ class ChatPage(QWidget):
                     border: none;
                     padding: 5px;
                 }
-                QPushButton:hover { color: white; }
+                QPushButton:hover { color: white; background-color: rgba(255, 255, 255, 0.1); border-radius: 5px; }
             """)
             toolbar_layout.addWidget(btn)
+            
+        self.btn_attach.clicked.connect(self.action_attach_file)
+        self.btn_voice.clicked.connect(self.action_voice_input)
+        self.btn_camera.clicked.connect(self.action_camera)
+        self.btn_emoji.clicked.connect(self.action_emoji)
+        
         toolbar_layout.addStretch()
         input_layout.addLayout(toolbar_layout)
         
@@ -171,3 +181,23 @@ class ChatPage(QWidget):
 
     def on_error(self, err):
         self.chat_history.append(f"<b style='color:#EF4444;'>Error:</b> {err}<br><br>")
+
+    def action_attach_file(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select a File to Attach")
+        if file_path:
+            current_text = self.input_field.toPlainText()
+            self.input_field.setText(f"{current_text}\n[Attached File: {file_path}]\n")
+            self.input_field.setFocus()
+            
+    def action_voice_input(self):
+        QMessageBox.information(self, "Voice Input", "Voice recognition is starting... (Placeholder)")
+        
+    def action_camera(self):
+        QMessageBox.information(self, "Camera", "Camera module starting... (Placeholder)")
+        
+    def action_emoji(self):
+        # A simple placeholder, ideally this would open an emoji picker widget
+        current_text = self.input_field.toPlainText()
+        self.input_field.setText(f"{current_text}😊")
+        self.input_field.setFocus()
+

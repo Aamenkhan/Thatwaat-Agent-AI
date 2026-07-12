@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit, QSpacerItem, QSizePolicy
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit, QSpacerItem, QSizePolicy, QPushButton, QMessageBox
 from PySide6.QtCore import Qt
 
 class TopBar(QWidget):
@@ -50,15 +50,33 @@ class TopBar(QWidget):
         
         layout.addStretch()
         
+        from PySide6.QtWidgets import QMessageBox
+        
         # Right: Connection & Profile
         self.status_label = QLabel("🟢 Ollama Connected")
         self.status_label.setStyleSheet("color: #10B981; font-weight: bold;")
         
-        self.notifications_icon = QLabel("🔔")
-        self.profile_icon = QLabel("👤")
+        self.notifications_btn = QPushButton("🔔")
+        self.profile_btn = QPushButton("👤")
+        
+        for btn in [self.notifications_btn, self.profile_btn]:
+            btn.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn.setStyleSheet("""
+                QPushButton {
+                    background-color: transparent;
+                    font-size: 16px;
+                    border: none;
+                }
+                QPushButton:hover { background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+            """)
+            btn.clicked.connect(self.show_placeholder)
         
         layout.addWidget(self.status_label)
         layout.addSpacing(20)
-        layout.addWidget(self.notifications_icon)
+        layout.addWidget(self.notifications_btn)
         layout.addSpacing(15)
-        layout.addWidget(self.profile_icon)
+        layout.addWidget(self.profile_btn)
+
+    def show_placeholder(self):
+        from PySide6.QtWidgets import QMessageBox
+        QMessageBox.information(self, "Coming Soon", "This feature is coming soon!")
