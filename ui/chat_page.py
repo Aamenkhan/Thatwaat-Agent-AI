@@ -1,10 +1,10 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QTextBrowser, QTextEdit, QHBoxLayout, 
                                QPushButton, QLabel, QScrollArea, QFrame, QGridLayout, QFileDialog, QMessageBox)
-from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtCore import Qt, QThread, QObject, Signal
 from agent import get_agent_response
 import markdown
 
-class AgentWorker(QThread):
+class AgentWorker(QObject):
     finished = Signal(str)
     error = Signal(str)
 
@@ -12,7 +12,7 @@ class AgentWorker(QThread):
         super().__init__()
         self.prompt = prompt
 
-    def run(self):
+    def process(self):
         try:
             response = get_agent_response(self.prompt)
             self.finished.emit(response)
@@ -169,10 +169,30 @@ class ChatPage(QWidget):
         self.chat_history.append(f"<div style='text-align:right;'><b style='color:#3B82F6;'>You:</b><br>{text}</div><br>")
         self.chat_history.append("<i style='color:gray;'>Agent is thinking...</i><br>")
         
+        self.thread = QThread()
         self.worker = AgentWorker(text)
+        self.worker.moveToThread(self.thread)
+        
+        self.thread.started.connect(self.worker.process)
         self.worker.finished.connect(self.on_response)
         self.worker.error.connect(self.on_error)
-        self.worker.start()
+        
+        # Proper cleanup
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker.error.connect(self.thread.quit)
+        self.worker.error.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        
+        self.thread.start()
+        
+        # Keep track of active threads to prevent garbage collection and allow cleanup on close
+        if not hasattr(self, 'active_threads'):
+            self.active_threads = []
+        self.active_threads.append(self.thread)
+        
+        # Safely remove from list when finished
+        self.thread.finished.connect(lambda t=self.thread: self.active_threads.remove(t) if t in self.active_threads else None)
 
     def on_response(self, text):
         html_text = markdown.markdown(text, extensions=['fenced_code', 'tables'])

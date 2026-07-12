@@ -70,3 +70,14 @@ class MainWindow(QMainWindow):
     def switch_page(self, index):
         """Switch to the requested page index."""
         self.stacked_widget.setCurrentIndex(index)
+
+    def closeEvent(self, event):
+        """Gracefully stop all worker threads across the app before closing."""
+        # Stop Chat threads
+        if hasattr(self.chat_page, 'active_threads'):
+            for thread in list(self.chat_page.active_threads):
+                if thread.isRunning():
+                    thread.quit()
+                    thread.wait()
+        event.accept()
+
