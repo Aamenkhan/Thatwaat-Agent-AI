@@ -10,3 +10,7 @@ easyocr
 selenium
 markdown
 PySide6
+TTS
+sounddevice
+numpy
+scipy

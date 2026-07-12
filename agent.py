@@ -14,22 +14,32 @@ messages = [
 ]
 from config import OLLAMA_MODEL
 
-def get_agent_response(user):
+def get_agent_response_stream(user):
     if user.lower() == "time":
-        return datetime.datetime.now().strftime("%I:%M %p")
+        yield datetime.datetime.now().strftime("%I:%M %p")
+        return
     if user.lower() == "date":
-        return str(datetime.date.today())
+        yield str(datetime.date.today())
+        return
 
     messages.append({"role": "user", "content": user})
 
-    response = ollama.chat(
-        model=OLLAMA_MODEL,
-        messages=messages,
-    )
+    try:
+        stream = ollama.chat(
+            model=OLLAMA_MODEL,
+            messages=messages,
+            stream=True
+        )
 
-    answer = response["message"]["content"]
-    messages.append({"role": "assistant", "content": answer})
-    return answer
+        full_answer = ""
+        for chunk in stream:
+            token = chunk["message"]["content"]
+            full_answer += token
+            yield token
+
+        messages.append({"role": "assistant", "content": full_answer})
+    except Exception as e:
+        yield f"\n\n[Error: {str(e)}]"
 
 def run_cli():
     print("=" * 50)
@@ -43,8 +53,10 @@ def run_cli():
         if user.lower() == "exit":
             break
         
-        answer = get_agent_response(user)
-        print("\nAI:", answer)
+        print("\nAI: ", end="", flush=True)
+        for token in get_agent_response_stream(user):
+            print(token, end="", flush=True)
+        print()
 
 if __name__ == "__main__":
     run_cli()

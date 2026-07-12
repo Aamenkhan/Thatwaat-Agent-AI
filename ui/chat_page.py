@@ -1,28 +1,40 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QTextBrowser, QTextEdit, QHBoxLayout, 
                                QPushButton, QLabel, QScrollArea, QFrame, QGridLayout, QFileDialog, QMessageBox)
 from PySide6.QtCore import Qt, QThread, QObject, Signal
-from agent import get_agent_response
+from agent import get_agent_response_stream
 import markdown
 
 class AgentWorker(QObject):
+    token_received = Signal(str)
     finished = Signal(str)
     error = Signal(str)
 
     def __init__(self, prompt):
         super().__init__()
         self.prompt = prompt
+        self.is_running = True
 
     def process(self):
         try:
-            response = get_agent_response(self.prompt)
-            self.finished.emit(response)
+            full_response = ""
+            for token in get_agent_response_stream(self.prompt):
+                if not self.is_running:
+                    break
+                full_response += token
+                self.token_received.emit(token)
+            self.finished.emit(full_response)
         except Exception as e:
             self.error.emit(str(e))
+            
+    def stop(self):
+        self.is_running = False
 
 class ChatPage(QWidget):
     """The main AI Chat interface with welcome card and modern input."""
     def __init__(self):
         super().__init__()
+        self.chat_html_history = ""
+        self.current_reply = ""
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(20)
@@ -145,7 +157,8 @@ class ChatPage(QWidget):
             </table>
         </div>
         """
-        self.chat_history.append(welcome_html)
+        self.chat_html_history += welcome_html
+        self.chat_history.setHtml(self.chat_html_history)
 
     def handle_link_click(self, url):
         action = url.toString()
@@ -166,14 +179,34 @@ class ChatPage(QWidget):
             return
             
         self.input_field.clear()
-        self.chat_history.append(f"<div style='text-align:right;'><b style='color:#3B82F6;'>You:</b><br>{text}</div><br>")
-        self.chat_history.append("<i style='color:gray;'>Agent is thinking...</i><br>")
+        
+        user_html = f"<div style='text-align:right;'><b style='color:#3B82F6;'>You:</b><br>{text}</div><br>"
+        self.chat_html_history += user_html
+        self.chat_history.setHtml(self.chat_html_history + "<i style='color:gray;'>Agent is thinking...</i><br>")
+        self.current_reply = ""
+        
+        # Change Send button to Stop button
+        self.send_btn.setText("⏹️ Stop")
+        self.send_btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: #EF4444;
+                border: none;
+                font-weight: bold;
+                font-size: 14px;
+                padding: 10px;
+            }
+            QPushButton:hover { color: #DC2626; }
+        """)
+        self.send_btn.clicked.disconnect()
+        self.send_btn.clicked.connect(self.stop_generation)
         
         self.thread = QThread()
         self.worker = AgentWorker(text)
         self.worker.moveToThread(self.thread)
         
         self.thread.started.connect(self.worker.process)
+        self.worker.token_received.connect(self.on_token)
         self.worker.finished.connect(self.on_response)
         self.worker.error.connect(self.on_error)
         
@@ -194,13 +227,47 @@ class ChatPage(QWidget):
         # Safely remove from list when finished
         self.thread.finished.connect(lambda t=self.thread: self.active_threads.remove(t) if t in self.active_threads else None)
 
+    def stop_generation(self):
+        if hasattr(self, 'worker'):
+            self.worker.stop()
+        self.reset_send_button()
+        
+    def reset_send_button(self):
+        self.send_btn.setText("➤ Send")
+        self.send_btn.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: #3B82F6;
+                border: none;
+                font-weight: bold;
+                font-size: 14px;
+                padding: 10px;
+            }
+            QPushButton:hover { color: #60A5FA; }
+        """)
+        self.send_btn.clicked.disconnect()
+        self.send_btn.clicked.connect(self.send_message)
+
+    def on_token(self, token):
+        self.current_reply += token
+        html_text = markdown.markdown(self.current_reply, extensions=['fenced_code', 'tables'])
+        cursor = " <span style='background-color: white; width: 8px; display: inline-block;'>&nbsp;</span>"
+        final_html = self.chat_html_history + f"<div style='background-color: #111827; padding: 15px; border-radius: 10px;'><b style='color:#10B981;'>Thatwaat AI:</b><br>{html_text}{cursor}</div><br><br>"
+        self.chat_history.setHtml(final_html)
+        self.chat_history.verticalScrollBar().setValue(self.chat_history.verticalScrollBar().maximum())
+
     def on_response(self, text):
+        self.reset_send_button()
         html_text = markdown.markdown(text, extensions=['fenced_code', 'tables'])
-        self.chat_history.append(f"<div style='background-color: #111827; padding: 15px; border-radius: 10px;'><b style='color:#10B981;'>Thatwaat AI:</b><br>{html_text}</div><br><br>")
+        agent_html = f"<div style='background-color: #111827; padding: 15px; border-radius: 10px;'><b style='color:#10B981;'>Thatwaat AI:</b><br>{html_text}</div><br><br>"
+        self.chat_html_history += agent_html
+        self.chat_history.setHtml(self.chat_html_history)
         self.chat_history.verticalScrollBar().setValue(self.chat_history.verticalScrollBar().maximum())
 
     def on_error(self, err):
-        self.chat_history.append(f"<b style='color:#EF4444;'>Error:</b> {err}<br><br>")
+        self.reset_send_button()
+        self.chat_html_history += f"<b style='color:#EF4444;'>Error:</b> {err}<br><br>"
+        self.chat_history.setHtml(self.chat_html_history)
 
     def action_attach_file(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select a File to Attach")

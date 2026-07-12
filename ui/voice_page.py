@@ -1,6 +1,8 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, 
-                               QComboBox, QSlider, QFrame, QSpacerItem, QSizePolicy)
-from PySide6.QtCore import Qt
+                               QComboBox, QSlider, QFrame, QSpacerItem, QSizePolicy, QFileDialog, QMessageBox)
+from PySide6.QtCore import Qt, QThread
+from voice import VoiceRecognizer
+from voice_clone import VoiceSynthesizer
 
 class VoicePage(QWidget):
     """The Voice Assistant and Cloning interface."""
@@ -121,3 +123,87 @@ class VoicePage(QWidget):
         layout.addWidget(settings_card)
         
         layout.addItem(QSpacerItem(20, 40, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        
+        # --- Function Connections ---
+        self.btn_listen.clicked.connect(self.start_listening)
+        self.btn_stop.clicked.connect(self.stop_listening)
+        self.btn_import_voice.clicked.connect(self.import_voice_sample)
+        self.btn_test_voice.clicked.connect(self.test_voice_clone)
+        
+        self.active_threads = []
+        self.speaker_wav_path = None
+        self.btn_stop.setEnabled(False)
+
+    def start_listening(self):
+        self.btn_listen.setEnabled(False)
+        self.btn_stop.setEnabled(True)
+        
+        self.rec_thread = QThread()
+        self.recognizer = VoiceRecognizer()
+        self.recognizer.moveToThread(self.rec_thread)
+        
+        self.rec_thread.started.connect(self.recognizer.process)
+        self.recognizer.text_recognized.connect(self.on_speech_recognized)
+        self.recognizer.status_updated.connect(self.status_label.setText)
+        self.recognizer.error_occurred.connect(self.on_voice_error)
+        
+        self.rec_thread.start()
+        self.active_threads.append(self.rec_thread)
+        self.rec_thread.finished.connect(lambda: self.active_threads.remove(self.rec_thread) if self.rec_thread in self.active_threads else None)
+
+    def stop_listening(self):
+        if hasattr(self, 'recognizer'):
+            self.recognizer.stop()
+        self.btn_listen.setEnabled(True)
+        self.btn_stop.setEnabled(False)
+
+    def on_speech_recognized(self, text):
+        from PySide6.QtWidgets import QMessageBox
+        # Display the recognized text, or send to chat
+        self.status_label.setText(f"Recognized: {text}")
+        print(f"Recognized: {text}")
+
+    def import_voice_sample(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select WAV Sample", "", "Audio Files (*.wav)")
+        if file_path:
+            import os
+            import shutil
+            os.makedirs("voices", exist_ok=True)
+            filename = os.path.basename(file_path)
+            dest = os.path.join("voices", filename)
+            shutil.copy(file_path, dest)
+            self.speaker_wav_path = dest
+            self.voice_selector.addItem(filename)
+            self.voice_selector.setCurrentText(filename)
+            QMessageBox.information(self, "Success", f"Voice sample {filename} imported successfully!")
+
+    def test_voice_clone(self):
+        if not self.speaker_wav_path:
+            QMessageBox.warning(self, "Error", "Please import a WAV voice sample first for XTTS v2.")
+            return
+            
+        speed = self.speed_slider.value() / 100.0
+        volume = self.volume_slider.value() / 100.0
+        
+        self.synth_thread = QThread()
+        self.synthesizer = VoiceSynthesizer()
+        self.synthesizer.moveToThread(self.synth_thread)
+        
+        # Avoid lambda to ensure process runs in the worker thread
+        self.synthesizer.text = "Hello, this is a cloned voice test."
+        self.synthesizer.speaker_wav = self.speaker_wav_path
+        self.synthesizer.language = "en"
+        self.synthesizer.speed = speed
+        self.synthesizer.volume = volume
+        
+        self.synth_thread.started.connect(self.synthesizer.process)
+        self.synthesizer.status_updated.connect(lambda s: print(f"Synth: {s}"))
+        self.synthesizer.error_occurred.connect(self.on_voice_error)
+        
+        self.synth_thread.start()
+        self.active_threads.append(self.synth_thread)
+        self.synth_thread.finished.connect(lambda: self.active_threads.remove(self.synth_thread) if self.synth_thread in self.active_threads else None)
+
+    def on_voice_error(self, err):
+        QMessageBox.critical(self, "Voice Error", err)
+
